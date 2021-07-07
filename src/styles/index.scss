@@ -19,7 +19,14 @@ $main-color: tomato;
   z-index: 100;
   left: 0px;
 }
+.fps{
+  position: fixed;
+  left: 40px;
+  top: 40px;
+  z-index: 10000;
+  color: black;
+  font-size: 26px;
+}
 // FILES
-
 @import 'components/main';
 @import 'components/logo';
