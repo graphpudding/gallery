@@ -24,23 +24,23 @@ let addJoystic = function(hero, BABYLON, engine) {
   local.fps = 75;
   scene.registerBeforeRender(() => {
     local.fps = engine.getFps().toFixed();
-    document.querySelector(".js-fps").innerHTML = local.fps;
+  //  document.querySelector(".js-fps").innerHTML = local.fps;
   })
   let WSpeed = (2.825 * 1.5) / local.fps;
   let mRotSpeed = (.07 * 75) / local.fps;
-  scene.getAnimationGroupByName("idle").name = "heroIdle";
-  local.idleAnim = scene.animationGroups.find(a => a.name === "heroIdle");
+  scene.getAnimationGroupByName("idle").name = "local.heroIdle";
+  local.idleAnim = scene.animationGroups.find(a => a.name === "local.heroIdle");
   local.idleParam = {
-    name: "heroIdle",
+    name: "local.heroIdle",
     anim: local.idleAnim,
     weight: 1
   };
   local.idleAnim.play(true);
   local.idleAnim.setWeightForAllAnimatables(1);
-  scene.getAnimationGroupByName("walk").name = "heroWalk";
-  local.walkAnim = scene.animationGroups.find(a => a.name === "heroWalk");
+  scene.getAnimationGroupByName("walk").name = "local.heroWalk";
+  local.walkAnim = scene.animationGroups.find(a => a.name === "local.heroWalk");
   local.walkParam = {
-    name: "heroWalk",
+    name: "local.heroWalk",
     anim: local.walkAnim,
     weight: 0
   };
@@ -57,7 +57,7 @@ let addJoystic = function(hero, BABYLON, engine) {
     //run
     //local.runParam.weight = clamp(blend - 1, 0, 1);
     //local.runParam.anim.setWeightForAllAnimatables(local.runParam.weight);
-    //heroSpeed
+    //local.heroSpeed
   }
 
   if (isMobileOrTablet()) {
@@ -100,7 +100,7 @@ let addJoystic = function(hero, BABYLON, engine) {
     let joystikMove = scene.onBeforeRenderObservable.add(function() {
       if (local.Jblend >= .1 && local.fps > 15) {
         BlendAnims(local.Jblend);
-        hero.moveWithCollisions(hero.forward.scaleInPlace(WSpeed * (local.Jblend / 2)));
+        local.hero.moveWithCollisions(local.hero.forward.scaleInPlace(WSpeed * (local.Jblend / 2)));
       }
     });
     let makeThumbArea  = function (name, thickness, color, background, curves) {
@@ -199,7 +199,7 @@ let addJoystic = function(hero, BABYLON, engine) {
 
     scene.registerBeforeRender(function() {
       if (Math.abs(xAddPos / 50) > .25) {
-        hero.rotation.y += (mRotSpeed * (xAddPos / 175) * .2);
+        local.hero.rotation.y += (mRotSpeed * (xAddPos / 175) * .2);
       }
       if (leftPuck.isDown) {
         local.Jblend = yAddPos / 66 < 1 ? yAddPos / 50 : 1;
@@ -234,7 +234,6 @@ let addJoystic = function(hero, BABYLON, engine) {
       if (event.code == 'ArrowUp') {
         local.Jblend = 1
       }
-
     })
     window.addEventListener('keyup', function(event) {
       if (event.code == 'ArrowRight' || event.code == 'ArrowLeft') {
@@ -248,9 +247,9 @@ let addJoystic = function(hero, BABYLON, engine) {
     scene.registerBeforeRender(function() {
       if (local.Jblend >= .1 && local.fps > 15) {
         BlendAnims(local.Jblend);
-        hero.moveWithCollisions(hero.forward.scaleInPlace(WSpeed * (local.Jblend / 2)));
+        local.hero.moveWithCollisions(local.hero.forward.scaleInPlace(WSpeed));
       }
-      hero.rotation.y += btnRot;
+      local.hero.rotation.y += btnRot;
     });
   }
 

@@ -27,7 +27,7 @@ var createScene = function() {
   // Our built-in 'sphere' shape.
 const pinHeight = 0.4;
 const pinDiameter = 0.07;
-let names = ["location","character","start_oint"]
+let names = ["location_objs","character","start_oint","collision2","collision"]
   let nameNum=0;
   loadSync()
 function loadSync(){
@@ -43,35 +43,50 @@ function loadSync(){
   })
 }
 function afterLoad(){
-  let ground = scene.getMeshByName("attribpromote4");
+  local.hero = scene.getMeshByName("character");
+  let ground = [];
   let groundC = scene.getMeshByName("collision");
-  ground.material.backFaceCulling = true;
-  let hero = scene.getMeshByName("character");
-  hero.setParent(null);
-  window.hero = hero;
-  hero.position.y=3
-  hero.rotationQuaternion = null;
-  hero.position.copyFrom(scene.getMeshByName("Sphere001").position.scale(10,10,10));
-  hero.rotation.y = 2.4146;
+  scene.meshes.forEach((item, i) => {
+    item.checkCollision=false;
+    if(item.name.search("Object")>-1){
+      ground.push(item);
+      item.scaling.set(1100,1100,1100);
+    }
+    if(item.name.search("Cube")>-1){
+        item.checkCollisions=true;
+      item.scaling.set(item.scaling.x*1000,item.scaling.y*1000,item.scaling.z*1000);
+      item.position.set(-1*item.position.x*1000,-1*item.position.y*1000,-1*item.position.z*1000)
+      item.visibility=0;
+    }
+  });
+  //hero.setParent(null);
+  window.hero = local.hero;
+    local.hero.rotationQuaternion = null;
+  let heroTushka = scene.getMeshByName("Alpha_Surface");
+    scene.getMeshByName("Alpha_Surface").rotationQuaternion = null;
+  //heroTushka.setParent(null);
+  //heroTushka.position = hero.position;
+  //heroTushka.rotation = hero.rotation;
+    local.hero.position.set(-40.054,1.830,15.56);
+    local.hero.rotation.y = 2.4146;
   //hero.rotation.z = Math.PI;
-  //groundC.visibility = 0;
-  groundC.position.y-=.1;
-  ground.scaling.set(1000,1000,1000);
-  groundC.scaling.set(1000,1000,1000);
+  groundC.position.y+=.45;
+  //groundC.scaling.set(1000,1000,1000);
+  groundC.visibility=0;
   let camParent = BABYLON.MeshBuilder.CreateBox("CB", {height: .1, width: .1, depth: .1})
   //camParent.parent = hero;
   camParent.visibility = 0;
   camParent.position.y = 3;
   camera.parent = camParent;
   camera.target.y=3;
-  camParent.position = hero.position;
-  camParent.rotation = hero.rotation;
+  camParent.position =   local.hero.position;
+  camParent.rotation =   local.hero.rotation;
   camera.position = new BABYLON.Vector3(0.19035765452352452,6.459144979665817,7.210969419781024);
   addLight();
-  addHeroGravitation(hero,groundC);
+  addHeroGravitation(local.hero,ground);
   console.log(addJoystic);
-  addJoystic(hero,BABYLON,engine);
-  addFOGmat(groundC,hero);
+  addJoystic(local.hero,BABYLON,engine);
+  addFOGmat(groundC,local.hero);
 }
 function addHeroMobility(){
 
@@ -101,12 +116,12 @@ function addHeroGravitation(rootOfTarget,ground) {
   let localMeshDirection = new BABYLON.Vector3(0, -1*Math.PI, 0);
   let length = 20;
   rayHelper.attachToMesh(rootOfTarget.rayBox, localMeshDirection, rootOfTarget.rayBox.position, length);
-  rayHelper.show(scene);
+  //rayHelper.show(scene);
   scene.onBeforeRenderObservable.add(function() {
     rootOfTarget.rayBox.position = new BABYLON.Vector3(0, .7, 0)
-    var hitInfo = ray.intersectsMeshes([ground]);
+    var hitInfo = ray.intersectsMeshes(ground);
     if (hitInfo.length) {
-        rootOfTarget.position.y = hitInfo[0].pickedPoint.y;
+        local.hero.position.y = hitInfo[0].pickedPoint.y;
     }
   });
 }
@@ -120,8 +135,8 @@ function addFOGmat(mesh,hero){
        varying float fFogDistance;
        void main(void) {
                vec4 worldPosition = world * vec4(position, 1.0);
-               fFogDistance = (view * worldPosition).z;
-               gl_Position =  viewProjection * worldPosition;
+               fFogDistance = worldPosition.z;
+               gl_Position =   worldPosition;
        }`;
 
 BABYLON.Effect.ShadersStore["myshaderFragmentShader"] = `
@@ -137,7 +152,7 @@ BABYLON.Effect.ShadersStore["myshaderFragmentShader"] = `
 
     float CalcFogFactor()
     {
-        float fogCoeff = 1.0;
+        float fogCoeff = 2.0;
         float fogStart = vFogInfos.y;
         float fogEnd = vFogInfos.z;
         float fogDensity = vFogInfos.w;
@@ -179,8 +194,8 @@ BABYLON.Effect.ShadersStore["myshaderFragmentShader"] = `
      mesh.material = fogMat;
 
      scene.fogMode = BABYLON.Scene.FOGMODE_LINEAR;
-     scene.fogStart = 40;
-     scene.fogEnd = 60;
+     scene.fogStart = 20;
+     scene.fogEnd =40;
 
      scene.fogColor = scene.clearColor;
      fogMat.onBind = function(mesh) {
@@ -190,7 +205,8 @@ BABYLON.Effect.ShadersStore["myshaderFragmentShader"] = `
       }
   let centerPos = new BABYLON.Vector3(-30.54143837352734,-0.07580753949230623,34.19776404584352);
   scene.registerBeforeRender(()=>{
-    scene.fogStart = 40 - hero.position.subtract(centerPos).length();
+    //scene.fogStart = 30 - hero.position.subtract(centerPos).length();
+
     //document.querySelector(".js-fps").innerHTML = scene.fogStart +","+ hero.position.subtract(centerPos).length();
   })
 }
